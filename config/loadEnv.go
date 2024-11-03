@@ -26,7 +26,7 @@ func loadEnv() {
 
 	redisUrl = os.Getenv(REDIS_URL)
 
-	rabbitmqUrl = os.Getenv(RABBITMQ_URL)
+	// rabbitmqUrl = os.Getenv(RABBITMQ_URL)
 
 	smtpEmail = os.Getenv(SMTP_EMAIL)
 	smtpHost = os.Getenv(SMTP_HOST)

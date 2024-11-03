@@ -1,42 +1,19 @@
 package model
 
 import (
-	"fmt"
-
-	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
 type Profile struct {
 	gorm.Model
-	Avatar    pq.Float64Array `json:"avatar" gorm:"type:float8[]"`
-	FirstName string          `json:"firstName"`
-	LastName  string          `json:"lastName"`
-	Phone     string          `json:"phone"`
-	Email     string          `json:"email"`
-	Address   string          `json:"address"`
-	Gender    string          `json:"gender"`
-	Username  string          `json:"username" gorm:"unique"`
-	Password  string          `json:"password"`
-	Role      string          `json:"role"` // admin - user - clin - spec - room
-	RoomId    *uint           `json:"roomId"`
-	Active    bool            `json:"active" gorm:"default:false"`
-}
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lasName"`
+	Email     string `json:"email" gorm:"unique"`
 
-type ROLE string
+	RoleId         uint  `json:"roleId"`
+	OrganizationId *uint `json:"organizationId"`
 
-const (
-	ADMIN ROLE = "admin"
-	USER  ROLE = "user"
-	CLIN  ROLE = "clin"
-	SPEC  ROLE = "spec"
-	ROOM  ROLE = "room"
-)
-
-func (p *Profile) BeforeCreate(tx *gorm.DB) (err error) {
-	var existingProfile Profile
-	if err = tx.Unscoped().Where("username = ? AND deleted_at IS NULL", p.Username).First(&existingProfile).Error; err == nil {
-		return fmt.Errorf("username %s đã tồn tại", p.Username)
-	}
-	return nil
+	Role            *Role            `json:"role" gorm:"foreignKey:RoleId; constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Organization    *Organization    `json:"organization" gorm:"foreignKey:OrganizationId; constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	CourseRegisters []CourseRegister `json:"courseRegisters" gorm:"foreignKey:ProfileId;"`
 }

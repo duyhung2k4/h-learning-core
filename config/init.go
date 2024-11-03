@@ -17,8 +17,5 @@ func init() {
 	makeVariable()
 	connectPostgresql(*db)
 	connectRedis()
-	createFolder()
-	initSocket()
-	connectRabbitmq()
 	initSmptAuth()
 }

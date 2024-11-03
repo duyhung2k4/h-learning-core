@@ -27,8 +27,8 @@ var (
 	smtpPort     string
 	smtpPassword string
 
-	redisUrl    string
-	rabbitmqUrl string
+	redisUrl string
+	// rabbitmqUrl string
 
 	dbPsql         *gorm.DB
 	redisClient    *redis.Client
