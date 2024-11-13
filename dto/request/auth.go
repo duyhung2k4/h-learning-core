@@ -6,23 +6,10 @@ type LoginRequest struct {
 }
 
 type RegisterReq struct {
-	ProfileId uint `json:"profileId"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-type SendFileAuthFaceReq struct {
-	Data      string `json:"data"`
-	ProfileId uint   `json:"profileId"`
-	Uuid      string `json:"uuid"`
-}
-
-type AuthFaceReq struct {
-	Data string `json:"data"`
-}
-
-type AcceptCodeReq struct {
+type AcceptCode struct {
 	Code string `json:"code"`
-}
-
-type SaveProcessReq struct {
-	ProfileId uint `json:"profileId"`
 }

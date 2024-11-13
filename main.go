@@ -2,6 +2,7 @@ package main
 
 import (
 	"app/config"
+	"app/job"
 	"app/router"
 	"log"
 	"net/http"
@@ -10,8 +11,7 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
-
-	wg.Add(1)
+	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
@@ -22,6 +22,12 @@ func main() {
 		}
 
 		log.Fatalln(server.ListenAndServe())
+	}()
+
+	// Chan job
+	go func() {
+		defer wg.Done()
+		job.InitJob()
 	}()
 
 	wg.Wait()

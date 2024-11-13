@@ -23,18 +23,20 @@ func apiV1(router chi.Router) {
 	})
 
 	router.Route("/public", func(public chi.Router) {
-		public.Post("/login", authController.Login)
 	})
 
 	router.Route("/auth", func(auth chi.Router) {
+		auth.Post("/login", authController.Login)
 		auth.Post("/register", authController.Register)
+		auth.Post("/accept-code", authController.AcceptCopde)
 	})
 
 	router.Route("/protected", func(protected chi.Router) {
 		protected.Use(jwtauth.Verifier(config.GetJWT()))
-		protected.Use(jwtauth.Authenticator(config.GetJWT()))
 		protected.Use(middlewares.ValidateExpAccessToken())
 
-		protected.Post("/refresh-token", authController.RefreshToken)
+		protected.Route("/auth", func(auth chi.Router) {
+			auth.Post("/refresh-token", authController.RefreshToken)
+		})
 	})
 }

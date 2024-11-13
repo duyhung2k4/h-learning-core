@@ -31,7 +31,7 @@ func AppRouter() http.Handler {
 	app.Route("/api/v1", apiV1)
 
 	log.Printf(
-		"Server art-pixel starting success! URL: http://%s:%s",
+		"Server h-learning-core starting success! URL: http://%s:%s",
 		config.GetAppHost(),
 		config.GetAppPort(),
 	)

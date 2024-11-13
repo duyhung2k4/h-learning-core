@@ -41,4 +41,7 @@ var (
 	jwt *jwtauth.JWTAuth
 
 	authSmtp smtp.Auth
+
+	// chanel job
+	emailChan chan EmailJob_MessPayload
 )

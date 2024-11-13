@@ -7,8 +7,13 @@ import (
 type Profile struct {
 	gorm.Model
 	FirstName string `json:"firstName"`
-	LastName  string `json:"lasName"`
-	Email     string `json:"email" gorm:"unique"`
+	LastName  string `json:"lastName"`
+	Phone     string `json:"phone"`
+
+	Email    string `json:"email" gorm:"unique"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Active   bool   `json:"active"`
 
 	RoleId         uint  `json:"roleId"`
 	OrganizationId *uint `json:"organizationId"`

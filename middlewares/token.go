@@ -34,24 +34,6 @@ func (m *middlewares) ValidateExpAccessToken() func(http.Handler) http.Handler {
 				return
 			}
 
-			// profileId := strconv.Itoa(int(mapData["profile_id"].(float64)))
-
-			// accessToken, errKeyAccessToken := m.rdb.Get(context.Background(), "access_token:"+profileId).Result()
-			// if errKeyAccessToken != nil {
-			// 	authServerError(w, r, errKeyAccessToken)
-			// 	return
-			// }
-			// refreshToken, errKeyRefreshToken := m.rdb.Get(context.Background(), "refresh_token:"+profileId).Result()
-			// if errKeyRefreshToken != nil {
-			// 	authServerError(w, r, errKeyRefreshToken)
-			// 	return
-			// }
-
-			// if accessToken != tokenString && refreshToken != tokenString {
-			// 	authServerError(w, r, errors.New("token not exist"))
-			// 	return
-			// }
-
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(funcHttp)
