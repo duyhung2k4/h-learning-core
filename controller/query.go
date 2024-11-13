@@ -30,40 +30,18 @@ func (c *queryController[T]) Query(w http.ResponseWriter, r *http.Request) {
 
 	switch payload.Method {
 	case constant.GET:
-		result, errHandle = c.query.First(
-			request.FirstPayload{
-				Preload:   payload.Preload,
-				Omit:      payload.Omit,
-				Condition: payload.Condition,
-			},
-			payload.Args...,
-		)
+		result, errHandle = c.query.First(payload)
 	case constant.GET_ALL:
-		result, errHandle = c.query.Find(
-			request.FindPayload{
-				Preload:   payload.Preload,
-				Omit:      payload.Omit,
-				Condition: payload.Condition,
-				Order:     payload.Order,
-			},
-			payload.Args...,
-		)
+		result, errHandle = c.query.Find(payload)
 	case constant.CREATE:
 		result, errHandle = c.query.Create(payload.Data)
+	case constant.MULTI_CREATE:
+		result, errHandle = c.query.MultiCreate(payload.Datas)
 	case constant.UPDATE:
-		result, errHandle = c.query.Update(
-			payload.Data,
-			payload.Preload,
-			payload.Omit,
-			payload.Condition,
-			payload.Args...,
-		)
+		result, errHandle = c.query.Update(payload)
 	case constant.DELETE:
 		result = nil
-		errHandle = c.query.Delete(
-			payload.Condition,
-			payload.Args...,
-		)
+		errHandle = c.query.Delete(payload)
 	}
 
 	if errHandle != nil {

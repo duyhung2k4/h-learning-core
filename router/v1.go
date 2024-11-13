@@ -4,6 +4,7 @@ import (
 	"app/config"
 	"app/controller"
 	middlewares "app/middlewares"
+	"app/model"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -12,9 +13,18 @@ import (
 )
 
 func apiV1(router chi.Router) {
-	authController := controller.NewAuthController()
 
 	middlewares := middlewares.NewMiddlewares()
+
+	authController := controller.NewAuthController()
+
+	courseQueryController := controller.NewQueryController[model.Course]()
+	categoryQueryController := controller.NewQueryController[model.Category]()
+	chapterQueryController := controller.NewQueryController[model.Chapter]()
+	lessionQueryController := controller.NewQueryController[model.Lession]()
+	documentLession := controller.NewQueryController[model.DocumentLession]()
+
+	courseController := controller.NewCourseController()
 
 	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, map[string]interface{}{
@@ -38,5 +48,20 @@ func apiV1(router chi.Router) {
 		protected.Route("/auth", func(auth chi.Router) {
 			auth.Post("/refresh-token", authController.RefreshToken)
 		})
+
+		protected.Route("/course", func(course chi.Router) {
+			course.Post("/create", courseController.CreateCourse)
+			course.Put("/update", courseController.UpdateCourse)
+			course.Delete("/delete", courseController.DeleteCourse)
+		})
+
+		protected.Post("/chapter", chapterQueryController.Query)
+		protected.Post("/lession", lessionQueryController.Query)
+		protected.Post("/document-lession", documentLession.Query)
+	})
+
+	router.Route("/query", func(query chi.Router) {
+		query.Post("/course", courseQueryController.Query)
+		query.Post("/category", categoryQueryController.Query)
 	})
 }

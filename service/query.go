@@ -12,14 +12,15 @@ type queryService[T any] struct {
 }
 
 type QueryService[T any] interface {
-	First(payload request.FirstPayload, agrs ...interface{}) (*T, error)
-	Find(payload request.FindPayload, agrs ...interface{}) ([]T, error)
+	First(payload request.QueryReq[T]) (*T, error)
+	Find(payload request.QueryReq[T]) ([]T, error)
 	Create(data T) (*T, error)
-	Update(data T, preload []string, omit map[string][]string, condition string, args ...interface{}) (*T, error)
-	Delete(condition string, args ...interface{}) error
+	MultiCreate(datas []T) ([]T, error)
+	Update(payload request.QueryReq[T]) (*T, error)
+	Delete(payload request.QueryReq[T]) error
 }
 
-func (s *queryService[T]) First(payload request.FirstPayload, agrs ...interface{}) (*T, error) {
+func (s *queryService[T]) First(payload request.QueryReq[T]) (*T, error) {
 	var item *T
 	var personOmit []string
 
@@ -29,7 +30,7 @@ func (s *queryService[T]) First(payload request.FirstPayload, agrs ...interface{
 		}
 	}
 
-	query := s.psql.Where(payload.Condition, agrs...).Omit(personOmit...)
+	query := s.psql.Where(payload.Condition, payload.Args...).Omit(personOmit...)
 
 	for _, p := range payload.Preload {
 		query.Preload(p, func(tx *gorm.DB) *gorm.DB {
@@ -45,7 +46,7 @@ func (s *queryService[T]) First(payload request.FirstPayload, agrs ...interface{
 	return item, nil
 }
 
-func (s *queryService[T]) Find(payload request.FindPayload, agrs ...interface{}) ([]T, error) {
+func (s *queryService[T]) Find(payload request.QueryReq[T]) ([]T, error) {
 	var list []T
 	var personOmit []string
 
@@ -55,7 +56,7 @@ func (s *queryService[T]) Find(payload request.FindPayload, agrs ...interface{})
 		}
 	}
 
-	query := s.psql.Where(payload.Condition, agrs...).Omit(personOmit...)
+	query := s.psql.Where(payload.Condition, payload.Args...).Omit(personOmit...)
 
 	for _, p := range payload.Preload {
 		query.Preload(p, func(tx *gorm.DB) *gorm.DB {
@@ -81,13 +82,13 @@ func (s *queryService[T]) Create(data T) (*T, error) {
 	return &newData, nil
 }
 
-func (s *queryService[T]) Update(data T, preload []string, omit map[string][]string, condition string, args ...interface{}) (*T, error) {
-	newData := data
+func (s *queryService[T]) Update(payload request.QueryReq[T]) (*T, error) {
+	newData := payload.Data
 
-	query := s.psql.Where(condition, args...).Updates(&newData)
-	for _, p := range preload {
+	query := s.psql.Where(payload.Condition, payload.Args...).Updates(&newData)
+	for _, p := range payload.Preload {
 		query.Preload(p, func(tx *gorm.DB) *gorm.DB {
-			return tx.Omit(omit[p]...)
+			return tx.Omit(payload.Omit[p]...)
 		})
 	}
 
@@ -98,9 +99,25 @@ func (s *queryService[T]) Update(data T, preload []string, omit map[string][]str
 	return &newData, nil
 }
 
-func (s *queryService[T]) Delete(condition string, args ...interface{}) error {
+func (s *queryService[T]) MultiCreate(datas []T) ([]T, error) {
+	newDatas := datas
+	if err := s.psql.Create(&newDatas).Error; err != nil {
+		return []T{}, err
+	}
+
+	return newDatas, nil
+}
+
+func (s *queryService[T]) Delete(payload request.QueryReq[T]) error {
 	var del T
-	if err := s.psql.Where(condition, args...).Unscoped().Delete(&del).Error; err != nil {
+
+	query := s.psql.Where(payload.Condition, payload.Args...)
+
+	if payload.Unscoped {
+		query = query.Unscoped()
+	}
+
+	if err := query.Delete(&del).Error; err != nil {
 		return err
 	}
 	return nil
