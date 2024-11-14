@@ -44,6 +44,7 @@ func connectPostgresql(migrate bool) error {
 			&model.SaleCourse{},
 			&model.TextNote{},
 			&model.VideoLession{},
+			&model.QuantityVideoLession{},
 		)
 
 		if errMigrate != nil {
