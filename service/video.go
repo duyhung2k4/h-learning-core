@@ -5,16 +5,12 @@ import (
 	"app/constant"
 	queuepayload "app/dto/queue_payload"
 	"app/model"
-	"context"
-	"encoding/json"
 
-	"github.com/rabbitmq/amqp091-go"
 	"gorm.io/gorm"
 )
 
 type videoService struct {
-	psql         *gorm.DB
-	connRabbitmq *amqp091.Connection
+	psql *gorm.DB
 }
 
 type VideoService interface {
@@ -40,58 +36,11 @@ func (s *videoService) UploadQuantityVideo(payload queuepayload.QueueUrlQuantity
 		return err
 	}
 
-	var videoLession model.VideoLession
-	err = s.psql.Model(&model.VideoLession{}).Where("code = ?", payload.Uuid).First(&videoLession).Error
-	if err != nil {
-		return err
-	}
-
-	if videoLession.Url360p == nil {
-		return nil
-	}
-
-	// if videoLession.Url360p == nil ||
-	// 	videoLession.Url480p == nil ||
-	// 	videoLession.Url720p == nil ||
-	// 	videoLession.Url1080p == nil {
-	// 	return nil
-	// }
-
-	ch, err := s.connRabbitmq.Channel()
-	if err != nil {
-		return err
-	}
-
-	payloadMess := queuepayload.QueueFileDeleteMp4{
-		Uuid: payload.Uuid,
-	}
-
-	payloadJsonString, err := json.Marshal(payloadMess)
-	if err != nil {
-		return err
-	}
-
-	err = ch.PublishWithContext(context.Background(),
-		"",
-		string(constant.QUEUE_DELETE_MP4),
-		false,
-		false,
-		amqp091.Publishing{
-			ContentType: "application/json",
-			Body:        payloadJsonString,
-		},
-	)
-
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func NewVideoService() VideoService {
 	return &videoService{
-		psql:         config.GetPsql(),
-		connRabbitmq: config.GetRabbitmq(),
+		psql: config.GetPsql(),
 	}
 }
