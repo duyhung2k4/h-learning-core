@@ -4,6 +4,7 @@ import (
 	"app/model"
 	"fmt"
 
+	"github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -44,7 +45,6 @@ func connectPostgresql(migrate bool) error {
 			&model.SaleCourse{},
 			&model.TextNote{},
 			&model.VideoLession{},
-			&model.QuantityVideoLession{},
 		)
 
 		if errMigrate != nil {
@@ -61,11 +61,11 @@ func connectRedis() {
 	})
 }
 
-// func connectRabbitmq() error {
-// 	var err error
-// 	rabbitmq, err = amqp091.Dial(rabbitmqUrl)
-// 	if err != nil {
-// 		rabbitmq.Close()
-// 	}
-// 	return err
-// }
+func connectRabbitmq() error {
+	var err error
+	rabbitmq, err = amqp091.Dial(rabbitmqUrl)
+	if err != nil {
+		rabbitmq.Close()
+	}
+	return err
+}

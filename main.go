@@ -3,6 +3,7 @@ package main
 import (
 	"app/config"
 	"app/job"
+	"app/queue"
 	"app/router"
 	"log"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
@@ -22,6 +23,12 @@ func main() {
 		}
 
 		log.Fatalln(server.ListenAndServe())
+	}()
+
+	// queue
+	go func() {
+		defer wg.Done()
+		queue.InitQueue()
 	}()
 
 	// Chan job

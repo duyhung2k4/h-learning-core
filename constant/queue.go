@@ -1,10 +1,18 @@
 package constant
 
-type QUEUE string
+type QUEUE_QUANTITY string
+type QUEUE_FILE string
 
 const (
-	SEND_FILE_AUTH_QUEUE QUEUE = "send_file_auth_queue"
-	FACE_AUTH_QUEUE      QUEUE = "face_auth_queue"
-	SHOW_CHECK_QUEUE     QUEUE = "show_check_queue"
-	DRAW_PIXEL_QUEUE     QUEUE = "draw_pixel_queue"
+	QUEUE_MP4_360_P  QUEUE_QUANTITY = "queue_mp4_360_p"
+	QUEUE_MP4_480_P  QUEUE_QUANTITY = "queue_mp4_480_p"
+	QUEUE_MP4_720_P  QUEUE_QUANTITY = "queue_mp4_720_p"
+	QUEUE_MP4_1080_P QUEUE_QUANTITY = "queue_mp4_1080_p"
+)
+
+const (
+	QUEUE_FILE_M3U8        QUEUE_FILE = "queue_file_m3u8"
+	QUEUE_DELETE_FILE_M3U8 QUEUE_FILE = "queue_delete_file_m3u8"
+	QUEUE_DELETE_MP4       QUEUE_FILE = "queue_delete_mp4"
+	QUEUE_URL_QUANTITY     QUEUE_FILE = "queue_url_quantity"
 )
