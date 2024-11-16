@@ -56,13 +56,13 @@ func (s *queryService[T]) First(payload request.QueryReq[T]) (*T, error) {
 		return item, nil
 	}
 
-	jsonData, err := json.Marshal(item)
+	jsonItem, err := json.Marshal(item)
 	if err != nil {
 		return nil, err
 	}
 
-	var data map[string]interface{}
-	err = json.Unmarshal(jsonData, &data)
+	var mapItem map[string]interface{}
+	err = json.Unmarshal(jsonItem, &mapItem)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (s *queryService[T]) First(payload request.QueryReq[T]) (*T, error) {
 			continue
 		}
 
-		var result map[string]interface{} = data
+		var result map[string]interface{} = mapItem
 		for _, f := range fields {
 			f = strings.ToLower(string(f[0])) + f[1:]
 
@@ -81,18 +81,18 @@ func (s *queryService[T]) First(payload request.QueryReq[T]) (*T, error) {
 				return nil, nil
 			}
 
-			jsData, err := json.Marshal(result[f])
+			jsonData, err := json.Marshal(result[f])
 			if err != nil {
 				return nil, err
 			}
 
-			var cv map[string]interface{}
-			err = json.Unmarshal(jsData, &cv)
+			var converData map[string]interface{}
+			err = json.Unmarshal(jsonData, &converData)
 			if err != nil {
 				return nil, err
 			}
 
-			result = cv
+			result = converData
 		}
 	}
 
