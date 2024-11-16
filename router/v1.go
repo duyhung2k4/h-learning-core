@@ -63,5 +63,8 @@ func apiV1(router chi.Router) {
 	router.Route("/query", func(query chi.Router) {
 		query.Post("/course", courseQueryController.Query)
 		query.Post("/category", categoryQueryController.Query)
+		query.Post("/chapter", chapterQueryController.Query)
+		query.Post("/lession", lessionQueryController.Query)
+		query.Post("/document-lession", documentLession.Query)
 	})
 }

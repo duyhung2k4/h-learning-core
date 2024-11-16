@@ -12,5 +12,5 @@ type Lession struct {
 
 	Chapter      *Chapter      `json:"chapter" gorm:"foreignKey:ChapterId; constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Course       *Course       `json:"course" gorm:"foreignKey:CourseId; constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	VideoLession *VideoLession `json:"cideoLession" gorm:"foreignKey:LessionId"`
+	VideoLession *VideoLession `json:"videoLession" gorm:"foreignKey:LessionId"`
 }
