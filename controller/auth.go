@@ -41,6 +41,17 @@ func (c *authController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	exist, err := c.authService.CheckExistEmail(payload.Email)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	if *exist {
+		InternalServerError(w, r, errors.New("email exist"))
+		return
+	}
+
 	uuid, err := uuid.NewV6()
 	if err != nil {
 		InternalServerError(w, r, err)

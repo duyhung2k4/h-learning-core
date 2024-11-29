@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/time/rate"
 	"gorm.io/gorm"
 )
 
@@ -64,4 +65,8 @@ func GetJWT() *jwtauth.JWTAuth {
 
 func GetSocketEvent() map[string]map[string]*websocket.Conn {
 	return mapSocketEvent
+}
+
+func GetLimiter() *rate.Limiter {
+	return limiter
 }

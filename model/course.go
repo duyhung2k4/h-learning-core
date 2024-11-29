@@ -9,12 +9,12 @@ type Course struct {
 	Description string  `json:"description"`
 	MultiLogin  bool    `json:"multiLogin"`
 	Value       float64 `json:"value"`
+	Active      bool    `json:"active"`
 
-	CategoryId uint `json:"categoryId"`
-	CreateId   uint `json:"createId"`
+	CreateId uint `json:"createId"`
 
-	Category    *Category    `json:"category" gorm:"foreignKey:CategoryId; constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Create      *Profile     `json:"create" gorm:"foreignKey:CreateId; constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Chapters    []Chapter    `json:"chapters" gorm:"foreignKey:CourseId;"`
-	SaleCourses []SaleCourse `json:"saleCourses" gorm:"foreignKey:CourseId;"`
+	Create          *Profile         `json:"create" gorm:"foreignKey:CreateId; constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	CourseCategorys []CourseCategory `json:"courseCategorys" gorm:"foreignKey:CourseId;"`
+	Chapters        []Chapter        `json:"chapters" gorm:"foreignKey:CourseId;"`
+	SaleCourses     []SaleCourse     `json:"saleCourses" gorm:"foreignKey:CourseId;"`
 }

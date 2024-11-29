@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/time/rate"
 	"gorm.io/gorm"
 )
 
@@ -44,4 +45,7 @@ var (
 
 	// chanel job
 	emailChan chan EmailJob_MessPayload
+
+	//http
+	limiter *rate.Limiter
 )

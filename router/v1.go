@@ -25,6 +25,7 @@ func apiV1(router chi.Router) {
 	documentLession := controller.NewQueryController[model.DocumentLession]()
 
 	courseController := controller.NewCourseController()
+	chapterController := controller.NewChapterController()
 
 	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, map[string]interface{}{
@@ -52,12 +53,14 @@ func apiV1(router chi.Router) {
 		protected.Route("/course", func(course chi.Router) {
 			course.Post("/create", courseController.CreateCourse)
 			course.Put("/update", courseController.UpdateCourse)
-			course.Delete("/delete", courseController.DeleteCourse)
+			course.Put("/change-active", courseController.ChangeActive)
 		})
 
-		protected.Post("/chapter", chapterQueryController.Query)
-		protected.Post("/lession", lessionQueryController.Query)
-		protected.Post("/document-lession", documentLession.Query)
+		protected.Route("/chapter", func(chapter chi.Router) {
+			chapter.Post("/create", chapterController.Create)
+			chapter.Put("/update", chapterController.Update)
+			chapter.Delete("/delete", chapterController.Delete)
+		})
 	})
 
 	router.Route("/query", func(query chi.Router) {

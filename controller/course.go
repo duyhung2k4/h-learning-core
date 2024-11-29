@@ -18,34 +18,19 @@ type courseController struct {
 }
 
 type CourseController interface {
-	getProfileId(r *http.Request) (uint, error)
-
 	CreateCourse(w http.ResponseWriter, r *http.Request)
 	UpdateCourse(w http.ResponseWriter, r *http.Request)
-	DeleteCourse(w http.ResponseWriter, r *http.Request)
-}
-
-func (c *courseController) getProfileId(r *http.Request) (uint, error) {
-	token := c.jwtUtils.GetToken(r)
-	mapInfo, err := c.jwtUtils.GetMapToken(token)
-
-	if err != nil {
-		return 0, err
-	}
-
-	profileId := uint(mapInfo["id"].(float64))
-
-	return profileId, nil
+	ChangeActive(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) {
-	var payload request.QueryReq[model.Course]
+	var payload request.CreateCourseReq
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		BadRequest(w, r, err)
 		return
 	}
 
-	profileId, err := c.getProfileId(r)
+	profileId, err := c.jwtUtils.GetProfileId(r)
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
@@ -57,10 +42,19 @@ func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	payload.Data.CreateId = profileId
-	payload.Data.Code = codeCourse.String()
+	newCourse := request.QueryReq[model.Course]{
+		Data: model.Course{
+			CreateId:    profileId,
+			Code:        codeCourse.String(),
+			Name:        payload.Name,
+			Description: payload.Description,
+			MultiLogin:  payload.MultiLogin,
+			Value:       payload.Value,
+			Active:      true,
+		},
+	}
 
-	result, err := c.queryCourse.Create(payload.Data)
+	result, err := c.queryCourse.Create(newCourse.Data)
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
@@ -77,23 +71,30 @@ func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) 
 }
 
 func (c *courseController) UpdateCourse(w http.ResponseWriter, r *http.Request) {
-	var payload request.QueryReq[model.Course]
+	var payload request.UpdateCourseReq
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		BadRequest(w, r, err)
 		return
 	}
 
-	profileId, err := c.getProfileId(r)
+	profileId, err := c.jwtUtils.GetProfileId(r)
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
 	}
 
-	payload.Data.CreateId = profileId
-	payload.Condition = "id = ? AND create_id = ?"
-	payload.Args = []interface{}{payload.Data.ID, profileId}
+	newCourse := request.QueryReq[model.Course]{
+		Data: model.Course{
+			Name:        *payload.Name,
+			Description: *payload.Description,
+			MultiLogin:  *payload.MultiLogin,
+			Value:       *payload.Value,
+		},
+		Condition: "id = ? AND create_id = ?",
+		Args:      []interface{}{payload.Id, profileId},
+	}
 
-	result, err := c.queryCourse.Update(payload)
+	result, err := c.queryCourse.Update(newCourse)
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
@@ -109,32 +110,35 @@ func (c *courseController) UpdateCourse(w http.ResponseWriter, r *http.Request) 
 	render.JSON(w, r, res)
 }
 
-func (c *courseController) DeleteCourse(w http.ResponseWriter, r *http.Request) {
-	var payload request.QueryReq[model.Course]
+func (c *courseController) ChangeActive(w http.ResponseWriter, r *http.Request) {
+	var payload request.ChangeAvticeCourseReq
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		BadRequest(w, r, err)
 		return
 	}
 
-	profileId, err := c.getProfileId(r)
+	profileId, err := c.jwtUtils.GetProfileId(r)
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
 	}
 
-	payload.Data.CreateId = profileId
-	payload.Unscoped = false
-	payload.Condition = "id = ? AND create_id = ?"
-	payload.Args = []interface{}{payload.Data.ID, profileId}
+	newCourseCourse := request.QueryReq[model.Course]{
+		Data: model.Course{
+			Active: payload.Active,
+		},
+		Condition: "id = ? AND create_id = ?",
+		Args:      []interface{}{payload.Id, profileId},
+	}
 
-	err = c.queryCourse.Delete(payload)
+	result, err := c.queryCourse.Update(newCourseCourse)
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
 	}
 
 	res := Response{
-		Data:    nil,
+		Data:    result,
 		Message: "OK",
 		Status:  200,
 		Error:   nil,

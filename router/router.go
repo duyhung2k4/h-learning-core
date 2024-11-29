@@ -2,6 +2,7 @@ package router
 
 import (
 	"app/config"
+	"app/middlewares"
 	"log"
 	"net/http"
 
@@ -18,6 +19,7 @@ func AppRouter() http.Handler {
 	app.Use(middleware.RealIP)
 	app.Use(middleware.Logger)
 	app.Use(middleware.Recoverer)
+	app.Use(middlewares.RateLimiter(config.GetLimiter()))
 
 	app.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},

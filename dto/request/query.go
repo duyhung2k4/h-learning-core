@@ -17,6 +17,12 @@ type QueryReq[T any] struct {
 	PreloadNull bool                `json:"preloadNull"`
 }
 
+type QueryRawReq[T any] struct {
+	Data []interface{} `json:"data"`
+	Args []interface{} `json:"args"`
+	Sql  string        `json:"sql"`
+}
+
 type FindPayload struct {
 	Condition string
 	Preload   map[string]*string

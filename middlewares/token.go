@@ -19,6 +19,11 @@ type Middlewares interface {
 func (m *middlewares) ValidateExpAccessToken() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		funcHttp := func(w http.ResponseWriter, r *http.Request) {
+			if len(strings.Split(r.Header.Get("Authorization"), " ")) != 2 {
+				authServerError(w, r, errors.New("token not found"))
+				return
+			}
+
 			tokenString := strings.Split(r.Header.Get("Authorization"), " ")[1]
 			mapData, errMapData := m.utils.JwtDecode(tokenString)
 

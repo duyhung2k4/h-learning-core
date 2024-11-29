@@ -7,7 +7,8 @@ type Role struct {
 	Name string `json:"name"`
 	Code ROLE   `json:"code" gorm:"unique"`
 
-	Profiles []Profile `json:"profiles" gorm:"foreignKey:RoleId;"`
+	Profiles        []Profile        `json:"profiles" gorm:"foreignKey:RoleId;"`
+	RolePermissions []RolePermission `json:"rolePermissions" gorm:"foreignKey:RoleId;"`
 }
 
 type ROLE string

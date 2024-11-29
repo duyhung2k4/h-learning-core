@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type queryService[T any] struct {
@@ -144,20 +145,8 @@ func (s *queryService[T]) Create(data T) (*T, error) {
 func (s *queryService[T]) Update(payload request.QueryReq[T]) (*T, error) {
 	newData := payload.Data
 
-	query := s.psql.Where(payload.Condition, payload.Args...).Updates(&newData)
-	for p, c := range payload.Preload {
-		if c != nil {
-			query.Preload(p, gorm.Expr(*c), func(tx *gorm.DB) *gorm.DB {
-				return tx.Omit(payload.Omit[p]...)
-			})
-		} else {
-			query.Preload(p, func(tx *gorm.DB) *gorm.DB {
-				return tx.Omit(payload.Omit[p]...)
-			})
-		}
-	}
-
-	if err := query.First(&newData).Error; err != nil {
+	err := s.psql.Where(payload.Condition, payload.Args...).Clauses(clause.Returning{}).Updates(&newData).Error
+	if err != nil {
 		return nil, err
 	}
 
