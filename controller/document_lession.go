@@ -12,29 +12,28 @@ import (
 	"github.com/go-chi/render"
 )
 
-type chapterController struct {
-	queryService    service.QueryService[model.Chapter]
-	queryRawService service.QueryRawService[model.Chapter]
+type documentLessionController struct {
+	queryService    service.QueryService[model.DocumentLession]
+	queryRawService service.QueryRawService[model.DocumentLession]
 	jwtUtils        utils.JwtUtils
 }
 
-type ChapterController interface {
+type DocumentLessionController interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
-func (c *chapterController) Create(w http.ResponseWriter, r *http.Request) {
-	var payload request.CreateChapterReq
+func (c *documentLessionController) Create(w http.ResponseWriter, r *http.Request) {
+	var payload request.CreateDocumentLessionReq
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		BadRequest(w, r, err)
 		return
 	}
 
-	chapter, err := c.queryService.Create(model.Chapter{
-		Name:        payload.Name,
-		Description: payload.Description,
-		CourseId:    payload.CourseId,
+	chapter, err := c.queryService.Create(model.DocumentLession{
+		Content:   payload.Content,
+		LessionId: payload.LessionId,
 	})
 	if err != nil {
 		InternalServerError(w, r, err)
@@ -51,8 +50,8 @@ func (c *chapterController) Create(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, res)
 }
 
-func (c *chapterController) Update(w http.ResponseWriter, r *http.Request) {
-	var payload request.UpdateChapterReq
+func (c *documentLessionController) Update(w http.ResponseWriter, r *http.Request) {
+	var payload request.UpdateDocumentLessionReq
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		BadRequest(w, r, err)
 		return
@@ -64,20 +63,20 @@ func (c *chapterController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newChapter, err := c.queryRawService.Query(request.QueryRawReq[model.Chapter]{
+	newChapter, err := c.queryRawService.Query(request.QueryRawReq[model.DocumentLession]{
 		Sql: `
-			UPDATE chapters
+			UPDATE document_lessions
 			SET
-				name = ?,
-				description = ?
-			FROM courses
+				content = ?
+			FROM lessions, courses
 			WHERE
-				chapters.id = ?
-				AND chapters.course_id = courses.id
+				document_lessions.id = ?
+				AND lessions.id = document_lessions.lession_id
+				AND lessions.course_id = courses.id
   				AND courses.create_id = ?
-			RETURNING chapters.*
+			RETURNING document_lessions.*
 		`,
-		Data: []interface{}{payload.Name, payload.Description},
+		Data: []interface{}{payload.Content},
 		Args: []interface{}{
 			payload.Id,
 			profileId,
@@ -98,8 +97,8 @@ func (c *chapterController) Update(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, res)
 }
 
-func (c *chapterController) Delete(w http.ResponseWriter, r *http.Request) {
-	var payload request.DeleteChapterReq
+func (c *documentLessionController) Delete(w http.ResponseWriter, r *http.Request) {
+	var payload request.DeleteDocumentLessionReq
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		BadRequest(w, r, err)
 		return
@@ -111,21 +110,22 @@ func (c *chapterController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = c.queryRawService.Query(request.QueryRawReq[model.Chapter]{
+	_, err = c.queryRawService.Query(request.QueryRawReq[model.DocumentLession]{
 		Args: []interface{}{
 			time.Now(),
 			payload.Id,
 			profileId,
 		},
 		Sql: `
-			UPDATE chapters
+			UPDATE document_lessions
 			SET
 				deleted_at = ?
-			FROM courses
+			FROM lessions, courses
 			WHERE
-				chapters.id = ?
-				AND chapters.course_id = courses.id
-				AND courses.create_id = ?
+				document_lessions.id = ?
+				AND lessions.id = document_lessions.lession_id
+				AND lessions.course_id = courses.id
+  				AND courses.create_id = ?
 		`,
 	})
 	if err != nil {
@@ -143,10 +143,10 @@ func (c *chapterController) Delete(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, res)
 }
 
-func NewChapterController() ChapterController {
-	return &chapterController{
-		queryService:    service.NewQueryService[model.Chapter](),
+func NewDocumentLessionController() DocumentLessionController {
+	return &documentLessionController{
+		queryService:    service.NewQueryService[model.DocumentLession](),
 		jwtUtils:        utils.NewJwtUtils(),
-		queryRawService: service.NewQueryRawService[model.Chapter](),
+		queryRawService: service.NewQueryRawService[model.DocumentLession](),
 	}
 }
