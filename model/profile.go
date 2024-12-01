@@ -8,7 +8,7 @@ type Profile struct {
 	gorm.Model
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
-	Phone     string `json:"phone"`
+	Phone     string `json:"phone" gorm:"unique"`
 
 	Email    string `json:"email" gorm:"unique"`
 	Username string `json:"username"`

@@ -41,7 +41,7 @@ func (c *authController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exist, err := c.authService.CheckExistEmail(payload.Email)
+	exist, err := c.authService.CheckExistAccount(payload.Email, payload.Phone)
 	if err != nil {
 		InternalServerError(w, r, err)
 		return

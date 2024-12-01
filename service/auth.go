@@ -26,7 +26,7 @@ type authService struct {
 }
 
 type AuthService interface {
-	CheckExistEmail(email string) (*bool, error)
+	CheckExistAccount(email string, phone string) (*bool, error)
 	CreateCode(length int) string
 	GetProfile(profileId uint) (*model.Profile, error)
 	SaveInfoRegsiter(uuid string, code string, infoRegister request.RegisterReq) error
@@ -35,17 +35,17 @@ type AuthService interface {
 	CreateToken(data map[string]interface{}) (string, string, error)
 }
 
-func (s *authService) CheckExistEmail(email string) (*bool, error) {
+func (s *authService) CheckExistAccount(email string, phone string) (*bool, error) {
 	var profile *model.Profile
 
 	if err := s.psql.
 		Model(&model.Profile{}).
-		Where("email = ?", email).
+		Where("email = ? AND phone = ?", email, phone).
 		First(&profile).Error; err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
 
-	if profile != nil {
+	if profile.ID != 0 {
 		return &constant.TRUE, nil
 	}
 
