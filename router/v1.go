@@ -28,6 +28,7 @@ func apiV1(router chi.Router) {
 	chapterController := controller.NewChapterController()
 	lessionController := controller.NewLessionController()
 	documentLessionController := controller.NewDocumentLessionController()
+	fileController := controller.NewFileController()
 
 	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, map[string]interface{}{
@@ -36,6 +37,9 @@ func apiV1(router chi.Router) {
 	})
 
 	router.Route("/public", func(public chi.Router) {
+		public.Route("/file", func(file chi.Router) {
+			file.Get("/thumnail_course/{filename}", fileController.Thumnail)
+		})
 	})
 
 	router.Route("/auth", func(auth chi.Router) {

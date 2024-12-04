@@ -6,6 +6,7 @@ import (
 	"app/service"
 	"app/utils"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -15,6 +16,7 @@ import (
 type courseController struct {
 	queryCourse service.QueryService[model.Course]
 	jwtUtils    utils.JwtUtils
+	fileUtils   utils.FileUtils
 }
 
 type CourseController interface {
@@ -25,8 +27,30 @@ type CourseController interface {
 
 func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) {
 	var payload request.CreateCourseReq
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	metadata := r.FormValue("metadata")
+	err := json.Unmarshal([]byte(metadata), &payload)
+
+	if err != nil {
 		BadRequest(w, r, err)
+		return
+	}
+
+	file, header, err := r.FormFile("thumnail")
+	if err != nil {
+		BadRequest(w, r, err)
+		return
+	}
+
+	uuidThumnail, err := uuid.NewV6()
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+	dirSave := "file/thumnail_course"
+
+	_, ext, err := c.fileUtils.CreateFile(uuidThumnail.String(), dirSave, file, header)
+	if err != nil {
+		InternalServerError(w, r, err)
 		return
 	}
 
@@ -50,6 +74,7 @@ func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) 
 			Description: payload.Description,
 			MultiLogin:  payload.MultiLogin,
 			Value:       payload.Value,
+			Thumnail:    fmt.Sprintf("%s%s", uuidThumnail.String(), ext),
 			Active:      true,
 		},
 	}
@@ -72,7 +97,10 @@ func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) 
 
 func (c *courseController) UpdateCourse(w http.ResponseWriter, r *http.Request) {
 	var payload request.UpdateCourseReq
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	metadata := r.FormValue("metadata")
+	err := json.Unmarshal([]byte(metadata), &payload)
+
+	if err != nil {
 		BadRequest(w, r, err)
 		return
 	}
@@ -151,5 +179,6 @@ func NewCourseController() CourseController {
 	return &courseController{
 		queryCourse: service.NewQueryService[model.Course](),
 		jwtUtils:    utils.NewJwtUtils(),
+		fileUtils:   utils.NewFileUtils(),
 	}
 }

@@ -10,6 +10,7 @@ type Course struct {
 	MultiLogin  bool    `json:"multiLogin"`
 	Value       float64 `json:"value"`
 	Active      bool    `json:"active"`
+	Thumnail    string  `json:"thumnail"`
 
 	CreateId uint `json:"createId"`
 

@@ -13,6 +13,7 @@ func init() {
 	initJwt()
 	loadEnv()
 	makeVariable()
+	makeFolder()
 	connectPostgresql(*db)
 	connectRabbitmq()
 	connectRedis()
