@@ -5,6 +5,7 @@ type CreateCourseReq struct {
 	Description string  `json:"description"`
 	MultiLogin  bool    `json:"multiLogin"`
 	Value       float64 `json:"value"`
+	Introduce   string  `json:"introduce"`
 }
 
 type UpdateCourseReq struct {
@@ -13,6 +14,7 @@ type UpdateCourseReq struct {
 	Description *string  `json:"description"`
 	MultiLogin  *bool    `json:"multiLogin"`
 	Value       *float64 `json:"value"`
+	Introduce   *string  `json:"introduce"`
 }
 
 type ChangeAvticeCourseReq struct {

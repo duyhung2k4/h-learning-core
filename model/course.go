@@ -6,6 +6,7 @@ type Course struct {
 	gorm.Model
 	Name        string  `json:"name"`
 	Code        string  `json:"code" gorm:"unique"`
+	Introduce   string  `json:"introduce"`
 	Description string  `json:"description"`
 	MultiLogin  bool    `json:"multiLogin"`
 	Value       float64 `json:"value"`

@@ -20,9 +20,37 @@ type courseController struct {
 }
 
 type CourseController interface {
+	GetCourse(w http.ResponseWriter, r *http.Request)
 	CreateCourse(w http.ResponseWriter, r *http.Request)
 	UpdateCourse(w http.ResponseWriter, r *http.Request)
 	ChangeActive(w http.ResponseWriter, r *http.Request)
+}
+
+func (c *courseController) GetCourse(w http.ResponseWriter, r *http.Request) {
+	profileId, err := c.jwtUtils.GetProfileId(r)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	courses, err := c.queryCourse.Find(request.QueryReq[model.Course]{
+		Condition: "create_id = ?",
+		Args:      []interface{}{profileId},
+	})
+
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	res := Response{
+		Data:    courses,
+		Message: "OK",
+		Status:  200,
+		Error:   nil,
+	}
+
+	render.JSON(w, r, res)
 }
 
 func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) {
@@ -74,6 +102,7 @@ func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) 
 			Description: payload.Description,
 			MultiLogin:  payload.MultiLogin,
 			Value:       payload.Value,
+			Introduce:   payload.Introduce,
 			Thumnail:    fmt.Sprintf("%s%s", uuidThumnail.String(), ext),
 			Active:      true,
 		},
@@ -117,6 +146,7 @@ func (c *courseController) UpdateCourse(w http.ResponseWriter, r *http.Request) 
 			Description: *payload.Description,
 			MultiLogin:  *payload.MultiLogin,
 			Value:       *payload.Value,
+			Introduce:   *payload.Introduce,
 		},
 		Condition: "id = ? AND create_id = ?",
 		Args:      []interface{}{payload.Id, profileId},

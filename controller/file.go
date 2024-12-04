@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -18,8 +17,6 @@ type FileController interface {
 func (c *fileController) Thumnail(w http.ResponseWriter, r *http.Request) {
 	filename := chi.URLParam(r, "filename")
 	filepath := fmt.Sprintf("file/thumnail_course/%s", filename)
-
-	log.Println(filepath)
 
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
 		http.Error(w, "File not found", http.StatusNotFound)

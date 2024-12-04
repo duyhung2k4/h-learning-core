@@ -57,6 +57,7 @@ func apiV1(router chi.Router) {
 		})
 
 		protected.Route("/course", func(course chi.Router) {
+			course.Get("/get-all", courseController.GetCourse)
 			course.Post("/create", courseController.CreateCourse)
 			course.Put("/update", courseController.UpdateCourse)
 			course.Put("/change-active", courseController.ChangeActive)
