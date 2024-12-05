@@ -11,6 +11,7 @@ type QueryReq[T any] struct {
 	Condition   string              `json:"condition"`
 	Preload     map[string]*string  `json:"preload"`
 	Omit        map[string][]string `json:"omit"`
+	Limit       int                 `json:"limit"`
 	Method      constant.METHOD     `json:"method"`
 	Order       string              `json:"order"`
 	Unscoped    bool                `json:"unscoped"`

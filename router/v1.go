@@ -65,6 +65,7 @@ func apiV1(router chi.Router) {
 		})
 
 		protected.Route("/chapter", func(chapter chi.Router) {
+			chapter.Get("/get-by-course", chapterController.GetByCourseId)
 			chapter.Post("/create", chapterController.Create)
 			chapter.Put("/update", chapterController.Update)
 			chapter.Delete("/delete", chapterController.Delete)

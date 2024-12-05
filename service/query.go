@@ -124,7 +124,12 @@ func (s *queryService[T]) Find(payload request.QueryReq[T]) ([]T, error) {
 		}
 	}
 
-	query = query.Order(payload.Order)
+	if payload.Order != "" {
+		query = query.Order(payload.Order)
+	}
+	if payload.Limit != 0 {
+		query = query.Limit(payload.Limit)
+	}
 
 	err := query.Find(&list).Error
 	if err != nil {

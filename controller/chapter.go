@@ -6,22 +6,96 @@ import (
 	"app/service"
 	"app/utils"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/render"
 )
 
 type chapterController struct {
-	queryService    service.QueryService[model.Chapter]
-	queryRawService service.QueryRawService[model.Chapter]
-	jwtUtils        utils.JwtUtils
+	queryChapterService    service.QueryService[model.Chapter]
+	queryLessionService    service.QueryService[model.Lession]
+	queryChapterRawService service.QueryRawService[model.Chapter]
+	jwtUtils               utils.JwtUtils
 }
 
 type ChapterController interface {
+	GetByCourseId(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
+}
+
+func (c *chapterController) GetByCourseId(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	courseIdString := params.Get("id")
+
+	if courseIdString == "" {
+		BadRequest(w, r, errors.New("courseId null"))
+		return
+	}
+
+	courseId, err := strconv.Atoi(courseIdString)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	profileId, err := c.jwtUtils.GetProfileId(r)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	chapters, err := c.queryChapterRawService.QueryAll(request.QueryRawReq[model.Chapter]{
+		Sql: `
+			SELECT ct.* FROM
+				chapters AS ct
+			JOIN courses AS c ON c.id = ct.course_id
+			WHERE 
+				c.create_id = ?
+				AND c.id = ?
+			ORDER BY ct.order ASC
+		`,
+		Args: []interface{}{profileId, uint(courseId)},
+	})
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	chapterIds := []uint{}
+	for _, c := range chapters {
+		chapterIds = append(chapterIds, c.ID)
+	}
+
+	lessions, err := c.queryLessionService.Find(request.QueryReq[model.Lession]{
+		Condition: "chapter_id IN ?",
+		Args:      []interface{}{chapterIds},
+	})
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	mapLessionsByCourseId := map[uint][]model.Lession{}
+	for _, c := range lessions {
+		mapLessionsByCourseId[c.ChapterId] = append(mapLessionsByCourseId[c.ChapterId], c)
+	}
+	for i, c := range chapters {
+		chapters[i].Lessions = mapLessionsByCourseId[c.ID]
+	}
+
+	res := Response{
+		Data:    chapters,
+		Message: "OK",
+		Status:  200,
+		Error:   nil,
+	}
+
+	render.JSON(w, r, res)
 }
 
 func (c *chapterController) Create(w http.ResponseWriter, r *http.Request) {
@@ -31,10 +105,36 @@ func (c *chapterController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chapter, err := c.queryService.Create(model.Chapter{
+	profileId, err := c.jwtUtils.GetProfileId(r)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	lastChapter, err := c.queryChapterRawService.Query(request.QueryRawReq[model.Chapter]{
+		Sql: `
+			SELECT ct.* FROM
+				chapters AS ct
+			JOIN courses AS c ON c.id = ct.course_id
+			WHERE 
+				c.create_id = ? 
+				AND c.id = ?
+			ORDER BY ct.order DESC
+			LIMIT 1
+		`,
+		Args: []interface{}{profileId, payload.CourseId},
+	})
+
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	chapter, err := c.queryChapterService.Create(model.Chapter{
 		Name:        payload.Name,
 		Description: payload.Description,
 		CourseId:    payload.CourseId,
+		Order:       lastChapter.Order + 1,
 	})
 	if err != nil {
 		InternalServerError(w, r, err)
@@ -64,7 +164,7 @@ func (c *chapterController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newChapter, err := c.queryRawService.Query(request.QueryRawReq[model.Chapter]{
+	newChapter, err := c.queryChapterRawService.Query(request.QueryRawReq[model.Chapter]{
 		Sql: `
 			UPDATE chapters
 			SET
@@ -111,7 +211,7 @@ func (c *chapterController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = c.queryRawService.Query(request.QueryRawReq[model.Chapter]{
+	_, err = c.queryChapterRawService.Query(request.QueryRawReq[model.Chapter]{
 		Args: []interface{}{
 			time.Now(),
 			payload.Id,
@@ -145,8 +245,9 @@ func (c *chapterController) Delete(w http.ResponseWriter, r *http.Request) {
 
 func NewChapterController() ChapterController {
 	return &chapterController{
-		queryService:    service.NewQueryService[model.Chapter](),
-		jwtUtils:        utils.NewJwtUtils(),
-		queryRawService: service.NewQueryRawService[model.Chapter](),
+		queryChapterService:    service.NewQueryService[model.Chapter](),
+		queryLessionService:    service.NewQueryService[model.Lession](),
+		jwtUtils:               utils.NewJwtUtils(),
+		queryChapterRawService: service.NewQueryRawService[model.Chapter](),
 	}
 }
