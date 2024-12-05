@@ -1,13 +1,17 @@
 package controller
 
 import (
+	"app/constant"
 	"app/dto/request"
 	"app/model"
 	"app/service"
 	"app/utils"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
@@ -21,6 +25,7 @@ type courseController struct {
 
 type CourseController interface {
 	GetCourse(w http.ResponseWriter, r *http.Request)
+	GetDetailCourse(w http.ResponseWriter, r *http.Request)
 	CreateCourse(w http.ResponseWriter, r *http.Request)
 	UpdateCourse(w http.ResponseWriter, r *http.Request)
 	ChangeActive(w http.ResponseWriter, r *http.Request)
@@ -36,6 +41,7 @@ func (c *courseController) GetCourse(w http.ResponseWriter, r *http.Request) {
 	courses, err := c.queryCourse.Find(request.QueryReq[model.Course]{
 		Condition: "create_id = ?",
 		Args:      []interface{}{profileId},
+		Order:     "id asc",
 	})
 
 	if err != nil {
@@ -45,6 +51,46 @@ func (c *courseController) GetCourse(w http.ResponseWriter, r *http.Request) {
 
 	res := Response{
 		Data:    courses,
+		Message: "OK",
+		Status:  200,
+		Error:   nil,
+	}
+
+	render.JSON(w, r, res)
+}
+
+func (c *courseController) GetDetailCourse(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	id := params.Get("id")
+
+	if id == "" {
+		BadRequest(w, r, errors.New("error id"))
+		return
+	}
+
+	profileId, err := c.jwtUtils.GetProfileId(r)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	courseId, err := strconv.Atoi(id)
+	if err != nil {
+		BadRequest(w, r, err)
+		return
+	}
+
+	course, err := c.queryCourse.First(request.QueryReq[model.Course]{
+		Condition: "id = ? AND create_id = ?",
+		Args:      []interface{}{uint(courseId), profileId},
+	})
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	res := Response{
+		Data:    course,
 		Message: "OK",
 		Status:  200,
 		Error:   nil,
@@ -68,14 +114,12 @@ func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) 
 		BadRequest(w, r, err)
 		return
 	}
-
 	uuidThumnail, err := uuid.NewV6()
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
 	}
 	dirSave := "file/thumnail_course"
-
 	_, ext, err := c.fileUtils.CreateFile(uuidThumnail.String(), dirSave, file, header)
 	if err != nil {
 		InternalServerError(w, r, err)
@@ -100,11 +144,11 @@ func (c *courseController) CreateCourse(w http.ResponseWriter, r *http.Request) 
 			Code:        codeCourse.String(),
 			Name:        payload.Name,
 			Description: payload.Description,
-			MultiLogin:  payload.MultiLogin,
+			MultiLogin:  &payload.MultiLogin,
 			Value:       payload.Value,
 			Introduce:   payload.Introduce,
 			Thumnail:    fmt.Sprintf("%s%s", uuidThumnail.String(), ext),
-			Active:      true,
+			Active:      &constant.TRUE,
 		},
 	}
 
@@ -134,6 +178,23 @@ func (c *courseController) UpdateCourse(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	file, header, err := r.FormFile("thumnail")
+	if err != nil {
+		BadRequest(w, r, err)
+		return
+	}
+	uuidThumnail, err := uuid.NewV6()
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+	dirSave := "file/thumnail_course"
+	_, ext, err := c.fileUtils.CreateFile(uuidThumnail.String(), dirSave, file, header)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
 	profileId, err := c.jwtUtils.GetProfileId(r)
 	if err != nil {
 		InternalServerError(w, r, err)
@@ -144,13 +205,16 @@ func (c *courseController) UpdateCourse(w http.ResponseWriter, r *http.Request) 
 		Data: model.Course{
 			Name:        *payload.Name,
 			Description: *payload.Description,
-			MultiLogin:  *payload.MultiLogin,
+			MultiLogin:  payload.MultiLogin,
 			Value:       *payload.Value,
+			Thumnail:    fmt.Sprintf("%s%s", uuidThumnail.String(), ext),
 			Introduce:   *payload.Introduce,
 		},
 		Condition: "id = ? AND create_id = ?",
 		Args:      []interface{}{payload.Id, profileId},
 	}
+
+	log.Println(newCourse.Data.MultiLogin)
 
 	result, err := c.queryCourse.Update(newCourse)
 	if err != nil {
@@ -183,7 +247,7 @@ func (c *courseController) ChangeActive(w http.ResponseWriter, r *http.Request) 
 
 	newCourseCourse := request.QueryReq[model.Course]{
 		Data: model.Course{
-			Active: payload.Active,
+			Active: &payload.Active,
 		},
 		Condition: "id = ? AND create_id = ?",
 		Args:      []interface{}{payload.Id, profileId},

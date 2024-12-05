@@ -6,7 +6,7 @@ type Permission struct {
 	gorm.Model
 	Api         string `json:"api" gorm:"unique"`
 	Description string `json:"description"`
-	Action      bool   `json:"action"`
+	Action      *bool  `json:"action"`
 
 	RolePermissions []RolePermission `json:"rolePermissions" gorm:"foreignKey:PermissionId;"`
 }

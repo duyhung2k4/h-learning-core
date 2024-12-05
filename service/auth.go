@@ -127,7 +127,7 @@ func (s *authService) CreateProfile(uuid string) error {
 		Email:    saveInfoRegister.InfoRegister.Email,
 		Password: password,
 		RoleId:   role.ID,
-		Active:   true,
+		Active:   &constant.TRUE,
 	}
 
 	if err := s.psql.Model(&model.Profile{}).Create(&profile).Error; err != nil {

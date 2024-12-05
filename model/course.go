@@ -8,9 +8,9 @@ type Course struct {
 	Code        string  `json:"code" gorm:"unique"`
 	Introduce   string  `json:"introduce"`
 	Description string  `json:"description"`
-	MultiLogin  bool    `json:"multiLogin"`
+	MultiLogin  *bool   `json:"multiLogin"`
 	Value       float64 `json:"value"`
-	Active      bool    `json:"active"`
+	Active      *bool   `json:"active"`
 	Thumnail    string  `json:"thumnail"`
 
 	CreateId uint `json:"createId"`

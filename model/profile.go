@@ -13,7 +13,7 @@ type Profile struct {
 	Email    string `json:"email" gorm:"unique"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Active   bool   `json:"active"`
+	Active   *bool  `json:"active"`
 
 	RoleId         uint  `json:"roleId"`
 	OrganizationId *uint `json:"organizationId"`
