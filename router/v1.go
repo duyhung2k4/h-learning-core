@@ -72,6 +72,7 @@ func apiV1(router chi.Router) {
 		})
 
 		protected.Route("/lession", func(lession chi.Router) {
+			lession.Get("/detail", lessionController.GetDetailLession)
 			lession.Post("/create", lessionController.Create)
 			lession.Put("/update", lessionController.Update)
 			lession.Delete("/delete", lessionController.Delete)

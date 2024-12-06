@@ -6,7 +6,9 @@ import (
 	"app/service"
 	"app/utils"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/render"
@@ -19,9 +21,65 @@ type lessionController struct {
 }
 
 type LessionController interface {
+	GetDetailLession(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
+}
+
+func (c *lessionController) GetDetailLession(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	idString := params.Get("id")
+
+	if idString == "" {
+		InternalServerError(w, r, errors.New("id null"))
+		return
+	}
+
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		return
+	}
+
+	profileId, err := c.jwtUtils.GetProfileId(r)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	lession, err := c.queryService.First(request.QueryReq[model.Lession]{
+		Preload: map[string]*string{
+			"Chapter":      nil,
+			"Course":       nil,
+			"VideoLession": nil,
+		},
+		Joins: []string{
+			"JOIN chapters AS ct ON ct.id = lessions.chapter_id",
+			"JOIN courses AS c ON c.id = lessions.course_id",
+		},
+		Condition: `
+			c.create_id = ?
+			AND lessions.id = ?
+		`,
+		Args: []interface{}{
+			profileId,
+			id,
+		},
+	})
+
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	res := Response{
+		Data:    lession,
+		Message: "OK",
+		Status:  200,
+		Error:   nil,
+	}
+
+	render.JSON(w, r, res)
 }
 
 func (c *lessionController) Create(w http.ResponseWriter, r *http.Request) {
