@@ -31,11 +31,41 @@ func (c *lessionController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	profileId, err := c.jwtUtils.GetProfileId(r)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	lastChapter, err := c.queryRawService.Query(request.QueryRawReq[model.Lession]{
+		Sql: `
+			SELECT l.* FROM lessions AS l
+			JOIN chapters AS ct ON ct.id = l.chapter_id
+			JOIN courses AS c ON c.id = l.course_id
+			WHERE
+				c.id = ?
+				AND ct.id = ?
+				AND c.create_id = ?
+			ORDER BY l.order DESC
+			LIMIT 1
+		`,
+		Args: []interface{}{
+			payload.CourseId,
+			payload.ChapterId,
+			profileId,
+		},
+	})
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
 	chapter, err := c.queryService.Create(model.Lession{
 		Name:        payload.Name,
 		Description: payload.Description,
 		CourseId:    payload.CourseId,
 		ChapterId:   payload.ChapterId,
+		Order:       lastChapter.Order + 1,
 	})
 	if err != nil {
 		InternalServerError(w, r, err)
