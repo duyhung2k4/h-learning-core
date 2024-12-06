@@ -49,43 +49,20 @@ func (c *chapterController) GetByCourseId(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	chapters, err := c.queryChapterRawService.QueryAll(request.QueryRawReq[model.Chapter]{
-		Sql: `
-			SELECT ct.* FROM
-				chapters AS ct
-			JOIN courses AS c ON c.id = ct.course_id
-			WHERE 
-				c.create_id = ?
-				AND c.id = ?
-			ORDER BY ct.order ASC
-		`,
-		Args: []interface{}{profileId, uint(courseId)},
+	chapters, err := c.queryChapterService.Find(request.QueryReq[model.Chapter]{
+		Preload: map[string]*string{
+			"Lessions": nil,
+		},
+		Joins: []string{
+			"JOIN courses ON courses.id = chapters.course_id",
+		},
+		Condition: "courses.create_id = ? AND courses.id = ?",
+		Args:      []interface{}{profileId, uint(courseId)},
+		Order:     "chapters.order ASC",
 	})
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
-	}
-
-	chapterIds := []uint{}
-	for _, c := range chapters {
-		chapterIds = append(chapterIds, c.ID)
-	}
-
-	lessions, err := c.queryLessionService.Find(request.QueryReq[model.Lession]{
-		Condition: "chapter_id IN ?",
-		Args:      []interface{}{chapterIds},
-	})
-	if err != nil {
-		InternalServerError(w, r, err)
-		return
-	}
-
-	mapLessionsByCourseId := map[uint][]model.Lession{}
-	for _, c := range lessions {
-		mapLessionsByCourseId[c.ChapterId] = append(mapLessionsByCourseId[c.ChapterId], c)
-	}
-	for i, c := range chapters {
-		chapters[i].Lessions = mapLessionsByCourseId[c.ID]
 	}
 
 	res := Response{
