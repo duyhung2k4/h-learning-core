@@ -29,6 +29,7 @@ func apiV1(router chi.Router) {
 	lessionController := controller.NewLessionController()
 	documentLessionController := controller.NewDocumentLessionController()
 	fileController := controller.NewFileController()
+	videoLessionController := controller.NewVideoLessionController()
 
 	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, map[string]interface{}{
@@ -76,6 +77,13 @@ func apiV1(router chi.Router) {
 			lession.Post("/create", lessionController.Create)
 			lession.Put("/update", lessionController.Update)
 			lession.Delete("/delete", lessionController.Delete)
+		})
+
+		protected.Route("/video-lession", func(videoLession chi.Router) {
+			videoLession.Get("/detail", videoLessionController.GetDetailVideoLession)
+			videoLession.Post("/create", videoLessionController.CreateVideoLession)
+			videoLession.Delete("/delete", videoLessionController.DeleteVideoLession)
+			videoLession.Post("/check-video-upload", videoLessionController.CheckVideoUpload)
 		})
 
 		protected.Route("/document-lession", func(documentLession chi.Router) {

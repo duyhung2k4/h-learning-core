@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/go-chi/render"
@@ -201,6 +201,16 @@ func (c *courseController) UpdateCourse(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	oldCourse, err := c.queryCourse.First(request.QueryReq[model.Course]{
+		Condition: "id = ? AND create_id = ?",
+		Args:      []interface{}{payload.Id, profileId},
+	})
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+	oldThumnail := fmt.Sprintf("file/thumnail_course/%s", oldCourse.Thumnail)
+
 	newCourse := request.QueryReq[model.Course]{
 		Data: model.Course{
 			Name:        *payload.Name,
@@ -214,9 +224,13 @@ func (c *courseController) UpdateCourse(w http.ResponseWriter, r *http.Request) 
 		Args:      []interface{}{payload.Id, profileId},
 	}
 
-	log.Println(newCourse.Data.MultiLogin)
-
 	result, err := c.queryCourse.Update(newCourse)
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	err = os.RemoveAll(oldThumnail)
 	if err != nil {
 		InternalServerError(w, r, err)
 		return
