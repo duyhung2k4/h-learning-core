@@ -153,7 +153,7 @@ func (c *videoLessionController) CheckVideoUpload(w http.ResponseWriter, r *http
 	videoLession, err := c.queryService.First(request.QueryReq[model.VideoLession]{
 		Joins: []string{
 			"JOIN lessions AS l ON l.id = video_lessions.lession_id",
-			"JOIN courses AS c ON c.id = lessions.course_id",
+			"JOIN courses AS c ON c.id = l.course_id",
 		},
 		Condition: "video_lessions.id = ? AND c.create_id = ?",
 		Args:      []interface{}{payload.VideoLessionId, profileId},
@@ -163,7 +163,7 @@ func (c *videoLessionController) CheckVideoUpload(w http.ResponseWriter, r *http
 		return
 	}
 
-	if videoLession.ID != 0 {
+	if videoLession.Url360p != nil {
 		InternalServerError(w, r, errors.New("video uploaded"))
 		return
 	}
