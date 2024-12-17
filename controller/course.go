@@ -29,6 +29,9 @@ type CourseController interface {
 	CreateCourse(w http.ResponseWriter, r *http.Request)
 	UpdateCourse(w http.ResponseWriter, r *http.Request)
 	ChangeActive(w http.ResponseWriter, r *http.Request)
+
+	GetAllCourse(w http.ResponseWriter, r *http.Request)
+	GetDetailCoursePublic(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *courseController) GetCourse(w http.ResponseWriter, r *http.Request) {
@@ -275,6 +278,62 @@ func (c *courseController) ChangeActive(w http.ResponseWriter, r *http.Request) 
 
 	res := Response{
 		Data:    result,
+		Message: "OK",
+		Status:  200,
+		Error:   nil,
+	}
+
+	render.JSON(w, r, res)
+}
+
+func (c *courseController) GetAllCourse(w http.ResponseWriter, r *http.Request) {
+	courses, err := c.queryCourse.Find(request.QueryReq[model.Course]{
+		Order: "id ASC",
+	})
+
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	res := Response{
+		Data:    courses,
+		Message: "OK",
+		Status:  200,
+		Error:   nil,
+	}
+
+	render.JSON(w, r, res)
+}
+
+func (c *courseController) GetDetailCoursePublic(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	id := params.Get("id")
+
+	if id == "" {
+		BadRequest(w, r, errors.New("error id"))
+		return
+	}
+
+	courseId, err := strconv.Atoi(id)
+	if err != nil {
+		BadRequest(w, r, err)
+		return
+	}
+
+	course, err := c.queryCourse.First(request.QueryReq[model.Course]{
+		Condition: "id = ?",
+		Args: []interface{}{
+			uint(courseId),
+		},
+	})
+	if err != nil {
+		InternalServerError(w, r, err)
+		return
+	}
+
+	res := Response{
+		Data:    course,
 		Message: "OK",
 		Status:  200,
 		Error:   nil,

@@ -38,6 +38,12 @@ func apiV1(router chi.Router) {
 	})
 
 	router.Route("/public", func(public chi.Router) {
+
+		public.Route("/course", func(course chi.Router) {
+			course.Get("/all", courseController.GetAllCourse)
+			course.Get("/detail", courseController.GetDetailCoursePublic)
+		})
+
 		public.Route("/file", func(file chi.Router) {
 			file.Get("/thumnail_course/{filename}", fileController.Thumnail)
 		})
