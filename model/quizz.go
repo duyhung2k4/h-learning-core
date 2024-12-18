@@ -13,6 +13,13 @@ type Quizz struct {
 	Pption     pq.StringArray `json:"option" gorm:"type:text[]"`
 	Time       int            `json:"time"`
 
-	EntityType string `json:"entityType"`
-	EntityId   uint   `json:"entityId"`
+	EntityType ENTITY_TYPE `json:"entityType"`
+	EntityId   uint        `json:"entityId"`
 }
+
+type ENTITY_TYPE string
+
+const (
+	QUIZZ_VIDEO_LESSION ENTITY_TYPE = "quizz_video_lession"
+	QUIZZ_LESSION       ENTITY_TYPE = "quizz_lession"
+)
