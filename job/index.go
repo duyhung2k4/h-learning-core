@@ -1,18 +1,13 @@
-package job
-
-import (
-	"sync"
-)
+package jobapp
 
 func InitJob() {
-	var wg sync.WaitGroup
-	wg.Add(1)
+	listJob := []func(){
+		NewEmailJob().handle,
+	}
 
-	emailJob := NewEmailJob()
-	go func() {
-		defer wg.Done()
-		emailJob.handle()
-	}()
-
-	wg.Wait()
+	for _, j := range listJob {
+		go func(job func()) {
+			job()
+		}(j)
+	}
 }

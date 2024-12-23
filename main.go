@@ -1,41 +1,21 @@
 package main
 
 import (
-	"app/config"
-	"app/job"
-	"app/queue"
-	"app/router"
-	"log"
-	"net/http"
+	"app/cmd/core-service/initialize"
+	"app/internal/connection"
 	"sync"
 )
 
 func main() {
 	var wg sync.WaitGroup
-	wg.Add(3)
+	wg.Add(1)
 
 	go func() {
 		defer wg.Done()
-		server := &http.Server{
-			Addr:           ":" + config.GetAppPort(),
-			Handler:        router.AppRouter(),
-			MaxHeaderBytes: 1 << 20,
-		}
-
-		log.Fatalln(server.ListenAndServe())
-	}()
-
-	// queue
-	go func() {
-		defer wg.Done()
-		queue.InitQueue()
-	}()
-
-	// Chan job
-	go func() {
-		defer wg.Done()
-		job.InitJob()
+		initialize.Run()
 	}()
 
 	wg.Wait()
+
+	connection.DeferFunc()
 }

@@ -1,10 +1,10 @@
 package queue
 
 import (
-	"app/config"
-	"app/constant"
-	queuepayload "app/dto/queue_payload"
-	"app/service"
+	"app/cmd/core-service/service"
+	"app/internal/connection"
+	constant "app/internal/constants"
+	queuepayload "app/internal/dto/queue_payload"
 	"encoding/json"
 	"log"
 
@@ -13,7 +13,7 @@ import (
 
 type queueUrlQuantity struct {
 	connRabbitmq *amqp091.Connection
-	videoService service.VideoService
+	service      service.Service
 }
 type QueueUrlQuantity interface {
 	Worker()
@@ -66,7 +66,7 @@ func (q *queueUrlQuantity) Worker() {
 				return
 			}
 
-			err = q.videoService.UploadQuantityVideo(payload)
+			err = q.service.VideoService.UploadQuantityVideo(payload)
 			if err != nil {
 				log.Println("error upload url video: ", err)
 				mess.Reject(true)
@@ -81,7 +81,7 @@ func (q *queueUrlQuantity) Worker() {
 
 func NewQueueUrlQuantity() QueueUrlQuantity {
 	return &queueUrlQuantity{
-		connRabbitmq: config.GetRabbitmq(),
-		videoService: service.NewVideoService(),
+		connRabbitmq: connection.GetRabbitmq(),
+		service:      service.Register(),
 	}
 }

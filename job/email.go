@@ -1,35 +1,33 @@
-package job
+package jobapp
 
 import (
-	"app/config"
-	"app/utils"
+	"app/internal/connection"
+	smptapp "app/pkg/smpt"
 )
 
 type emailJob struct {
-	emailChan chan config.EmailJob_MessPayload
-	smtp      utils.SmtpUtils
+	emailChan chan connection.EmailJob_MessPayload
 }
 
 type EmailJob interface {
 	handle()
-	PushJob(data config.EmailJob_MessPayload)
+	PushJob(data connection.EmailJob_MessPayload)
 }
 
 func (j *emailJob) handle() {
 	for q := range j.emailChan {
-		go func(data config.EmailJob_MessPayload) {
-			j.smtp.SendEmail(data.Content, data.Email)
+		go func(data connection.EmailJob_MessPayload) {
+			smptapp.SendEmail(data.Content, data.Email)
 		}(q)
 	}
 }
 
-func (j *emailJob) PushJob(data config.EmailJob_MessPayload) {
+func (j *emailJob) PushJob(data connection.EmailJob_MessPayload) {
 	j.emailChan <- data
 }
 
 func NewEmailJob() EmailJob {
 	return &emailJob{
-		emailChan: config.GetEmailChan(),
-		smtp:      utils.NewSmtpUtils(),
+		emailChan: connection.GetEmailChan(),
 	}
 }
