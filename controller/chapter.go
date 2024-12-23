@@ -23,6 +23,7 @@ type chapterController struct {
 
 type ChapterController interface {
 	GetByCourseId(w http.ResponseWriter, r *http.Request)
+	GetAllPublic(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
@@ -219,6 +220,8 @@ func (c *chapterController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	render.JSON(w, r, res)
 }
+
+func (c *chapterController) GetAllPublic(w http.ResponseWriter, r *http.Request) {}
 
 func NewChapterController() ChapterController {
 	return &chapterController{
