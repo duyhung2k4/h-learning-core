@@ -1,8 +1,8 @@
 package quizzhandle
 
 import (
-	"app/generated/grpc/enumgrpc"
-	"app/generated/grpc/servicegrpc"
+	"app/generated/proto/enumgrpc"
+	"app/generated/proto/servicegrpc"
 	"app/internal/apperrors"
 	constant "app/internal/constants"
 	httpresponse "app/pkg/http_response"

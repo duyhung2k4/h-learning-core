@@ -1,7 +1,7 @@
 package quizzhandle
 
 import (
-	"app/generated/grpc/sharedgrpc"
+	"app/generated/proto/sharedgrpc"
 	"app/internal/apperrors"
 	constant "app/internal/constants"
 	"app/internal/entity"

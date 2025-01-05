@@ -84,11 +84,11 @@ func Register(r *gin.Engine) {
 	})
 
 	routerconfig.AddRouter(r, routerconfig.RouterConfig{
-		Method:   constant.GET_HTTP,
-		Endpoint: "course/all-public",
+		Method:     constant.GET_HTTP,
+		Endpoint:   "course/all-public",
 		Middleware: []gin.HandlerFunc{
-			middlewareapp.ValidateToken,
-			middlewareapp.GetProfileId,
+			// middlewareapp.ValidateToken,
+			// middlewareapp.GetProfileId,
 		},
 		Handle: handle.GetAllCourse,
 	})

@@ -1,7 +1,7 @@
 package quizzhandle
 
 import (
-	"app/generated/grpc/sharedgrpc"
+	"app/generated/proto/sharedgrpc"
 	constant "app/internal/constants"
 	requestdata "app/internal/dto/client"
 	httpresponse "app/pkg/http_response"
