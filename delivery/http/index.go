@@ -4,6 +4,7 @@ import (
 	authhandle "app/cmd/core-service/delivery/http/auth"
 	chapterhandle "app/cmd/core-service/delivery/http/chapter"
 	coursehandle "app/cmd/core-service/delivery/http/course"
+	documentlessionhandle "app/cmd/core-service/delivery/http/document_lession"
 	filehandle "app/cmd/core-service/delivery/http/file"
 	lessionhandle "app/cmd/core-service/delivery/http/lession"
 	quizzhandle "app/cmd/core-service/delivery/http/quizz"
@@ -37,6 +38,7 @@ func Register() http.Handler {
 	videolessionhandle.Register(r)
 	filehandle.Register(r)
 	quizzhandle.Register(r)
+	documentlessionhandle.Register(r)
 
 	log.Printf(
 		"Server h-learning-core starting success! URL: http://%s:%s",
