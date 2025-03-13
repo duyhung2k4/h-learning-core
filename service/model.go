@@ -3,7 +3,6 @@ package service
 import (
 	authservice "app/cmd/core-service/service/auth"
 	videoservice "app/cmd/core-service/service/video"
-	"app/generated/proto/servicegrpc"
 	"app/internal/entity"
 	query "app/pkg/query/basic"
 	rawquery "app/pkg/query/raw"
@@ -25,5 +24,6 @@ type Service struct {
 	QueryVideoLession    query.QueryService[entity.VideoLession]
 	RawQueryVideoLession rawquery.QueryRawService[entity.VideoLession]
 
-	GrpcClientQuizz servicegrpc.QuizzServiceClient
+	QueryQuizz    query.QueryService[entity.Quizz]
+	RawQueryQuizz query.QueryService[entity.Quizz]
 }

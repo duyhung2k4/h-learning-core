@@ -37,7 +37,7 @@ func (h *courseHandle) CreateCourse(ctx *gin.Context) {
 		logapp.Logger("uuid-thumnail", err.Error(), constant.ERROR_LOG)
 		return
 	}
-	dirSave := "cmd/core-service/data/file/thumnail_course"
+	dirSave := "data/thumbnail_course"
 	_, ext, err := fileapp.CreateFile(uuidThumnail.String(), dirSave, file, header)
 	if err != nil {
 		httpresponse.InternalServerError(ctx, err)

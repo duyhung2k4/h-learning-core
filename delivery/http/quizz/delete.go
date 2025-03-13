@@ -1,9 +1,9 @@
 package quizzhandle
 
 import (
-	"app/generated/proto/sharedgrpc"
 	constant "app/internal/constants"
 	requestdata "app/internal/dto/client"
+	"app/internal/entity"
 	httpresponse "app/pkg/http_response"
 	logapp "app/pkg/log"
 	"encoding/json"
@@ -19,8 +19,9 @@ func (h *quizzHandle) DeleteQuizz(ctx *gin.Context) {
 		return
 	}
 
-	_, err := h.service.GrpcClientQuizz.DeleteById(ctx, &sharedgrpc.ID{
-		Id: deleteQuizzRequest.Id,
+	err := h.service.QueryQuizz.Delete(requestdata.QueryReq[entity.Quizz]{
+		Condition: "id = ?",
+		Args:      []interface{}{deleteQuizzRequest.Id},
 	})
 	if err != nil {
 		logapp.Logger("delete-quizz-grpc", err.Error(), constant.ERROR_LOG)

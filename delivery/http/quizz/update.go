@@ -1,10 +1,9 @@
 package quizzhandle
 
 import (
-	"app/generated/proto/enumgrpc"
-	"app/generated/proto/servicegrpc"
 	constant "app/internal/constants"
 	requestdata "app/internal/dto/client"
+	"app/internal/entity"
 	httpresponse "app/pkg/http_response"
 	logapp "app/pkg/log"
 	"encoding/json"
@@ -20,21 +19,23 @@ func (h *quizzHandle) UpdateQuizz(ctx *gin.Context) {
 		return
 	}
 
-	_, err := h.service.GrpcClientQuizz.UpdateQuizz(ctx, &servicegrpc.UpdateQuizzRequest{
-		Id: updateQuizzPayload.Id,
-		Payload: &servicegrpc.UpdateQuizzPayload{
+	res, err := h.service.QueryQuizz.Update(requestdata.QueryReq[entity.Quizz]{
+		Condition: "id = ?",
+		Args:      []interface{}{updateQuizzPayload.Id},
+		Data: entity.Quizz{
 			Ask:        updateQuizzPayload.Ask,
-			Time:       int32(updateQuizzPayload.Time),
-			ResultType: enumgrpc.ResultType(enumgrpc.ResultType_value[string(updateQuizzPayload.ResultType)]),
+			Time:       updateQuizzPayload.Time,
+			ResultType: updateQuizzPayload.ResultType,
 			Result:     updateQuizzPayload.Result,
 			Option:     updateQuizzPayload.Option,
 		},
 	})
+
 	if err != nil {
 		logapp.Logger("update-quizz-grpc", err.Error(), constant.ERROR_LOG)
 		httpresponse.InternalServerError(ctx, err)
 		return
 	}
 
-	httpresponse.Success(ctx, nil)
+	httpresponse.Success(ctx, res)
 }

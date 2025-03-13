@@ -1,10 +1,9 @@
 package quizzhandle
 
 import (
-	"app/generated/proto/enumgrpc"
-	"app/generated/proto/servicegrpc"
 	constant "app/internal/constants"
 	requestdata "app/internal/dto/client"
+	"app/internal/entity"
 	httpresponse "app/pkg/http_response"
 	logapp "app/pkg/log"
 	"encoding/json"
@@ -20,14 +19,14 @@ func (h *quizzHandle) CreateQuizz(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.service.GrpcClientQuizz.CreateQuizz(ctx, &servicegrpc.CreateQuizzRequest{
+	res, err := h.service.QueryQuizz.Create(entity.Quizz{
 		Ask:        createQuizzRequest.Ask,
-		Time:       int32(createQuizzRequest.Time),
-		Option:     createQuizzRequest.Option,
-		ResultType: enumgrpc.ResultType(enumgrpc.ResultType_value[string(createQuizzRequest.ResultType)]),
+		ResultType: createQuizzRequest.ResultType,
 		Result:     createQuizzRequest.Result,
-		EntityType: enumgrpc.EntityType(enumgrpc.EntityType_value[string(createQuizzRequest.EntityType)]),
-		EntityId:   uint64(createQuizzRequest.EntityId),
+		Option:     createQuizzRequest.Option,
+		Time:       createQuizzRequest.Time,
+		EntityType: createQuizzRequest.EntityType,
+		EntityId:   createQuizzRequest.EntityId,
 	})
 
 	if err != nil {

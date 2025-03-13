@@ -1,10 +1,10 @@
 package quizzhandle
 
 import (
-	"app/generated/proto/enumgrpc"
-	"app/generated/proto/servicegrpc"
 	"app/internal/apperrors"
 	constant "app/internal/constants"
+	requestdata "app/internal/dto/client"
+	"app/internal/entity"
 	httpresponse "app/pkg/http_response"
 	logapp "app/pkg/log"
 	"strconv"
@@ -32,8 +32,15 @@ func (h *quizzHandle) GetQuizzByEntityId(ctx *gin.Context) {
 		return
 	}
 
-	h.service.GrpcClientQuizz.GetListByEntityId(ctx, &servicegrpc.GetListQuizzRequest{
-		EntityId:   uint64(entityId),
-		EntityType: enumgrpc.EntityType(enumgrpc.EntityType_value[string(entityIdString)]),
+	res, err := h.service.QueryQuizz.Find(requestdata.QueryReq[entity.Quizz]{
+		Condition: "entity_id = ?",
+		Args:      []interface{}{entityId},
 	})
+	if err != nil {
+		logapp.Logger("get-quizz", err.Error(), constant.ERROR_LOG)
+		httpresponse.InternalServerError(ctx, err)
+		return
+	}
+
+	httpresponse.Success(ctx, res)
 }

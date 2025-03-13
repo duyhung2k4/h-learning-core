@@ -38,7 +38,7 @@ func (h *courseHandle) UpdateCourse(ctx *gin.Context) {
 		logapp.Logger("uuid-thumnail", err.Error(), constant.ERROR_LOG)
 		return
 	}
-	dirSave := "cmd/core-service/data/file/thumnail_course"
+	dirSave := "data/thumbnail_course"
 	_, ext, err := fileapp.CreateFile(uuidThumnail.String(), dirSave, file, header)
 	if err != nil {
 		httpresponse.InternalServerError(ctx, err)
@@ -57,7 +57,7 @@ func (h *courseHandle) UpdateCourse(ctx *gin.Context) {
 		logapp.Logger("get-old-course", err.Error(), constant.ERROR_LOG)
 		return
 	}
-	oldThumnail := fmt.Sprintf("cmd/core-service/data/file/thumnail_course/%s", oldCourse.Thumnail)
+	oldThumnail := fmt.Sprintf("data/thumbnail_course/%s", oldCourse.Thumnail)
 
 	newCourse := requestdata.QueryReq[entity.Course]{
 		Data: entity.Course{

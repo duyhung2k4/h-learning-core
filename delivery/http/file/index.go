@@ -22,7 +22,7 @@ func Register(r *gin.Engine) {
 
 	routerconfig.AddRouter(r, routerconfig.RouterConfig{
 		Method:     constant.GET_HTTP,
-		Endpoint:   "file/thumnail_course/:filename",
+		Endpoint:   "file/thumbnail_course/:filename",
 		Middleware: []gin.HandlerFunc{},
 		Handle:     handle.Thumnail,
 	})

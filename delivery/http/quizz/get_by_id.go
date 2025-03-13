@@ -1,17 +1,15 @@
 package quizzhandle
 
 import (
-	"app/generated/proto/sharedgrpc"
 	"app/internal/apperrors"
 	constant "app/internal/constants"
+	requestdata "app/internal/dto/client"
 	"app/internal/entity"
 	httpresponse "app/pkg/http_response"
 	logapp "app/pkg/log"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func (h *quizzHandle) GetQuizzById(ctx *gin.Context) {
@@ -29,8 +27,9 @@ func (h *quizzHandle) GetQuizzById(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.service.GrpcClientQuizz.GetById(ctx, &sharedgrpc.ID{
-		Id: uint64(quizzId),
+	res, err := h.service.QueryQuizz.First(requestdata.QueryReq[entity.Quizz]{
+		Condition: "id = ?",
+		Args:      []interface{}{quizzId},
 	})
 	if err != nil {
 		logapp.Logger("get-quizz-by-id", err.Error(), constant.ERROR_LOG)
@@ -38,20 +37,5 @@ func (h *quizzHandle) GetQuizzById(ctx *gin.Context) {
 		return
 	}
 
-	dataResponse := entity.Quizz{
-		Model: gorm.Model{
-			ID:        uint(res.Id),
-			CreatedAt: time.Unix(res.CreatedAt, 0).Local(),
-			UpdatedAt: time.Unix(res.UpdatedAt, 0).Local(),
-		},
-		Ask:        res.Ask,
-		Time:       int(res.Time),
-		ResultType: entity.RESULT_TYPE(res.ResultType.String()),
-		Result:     res.Result,
-		Option:     res.Option,
-		EntityType: entity.ENTITY_TYPE(res.Option[res.EntityType]),
-		EntityId:   uint(res.EntityId),
-	}
-
-	httpresponse.Success(ctx, dataResponse)
+	httpresponse.Success(ctx, res)
 }

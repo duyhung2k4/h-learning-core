@@ -10,7 +10,7 @@ import (
 
 func (c *fileHandle) Thumnail(ctx *gin.Context) {
 	filename := ctx.Param("filename")
-	filepath := fmt.Sprintf("cmd/core-service/data/file/thumnail_course/%s", filename)
+	filepath := fmt.Sprintf("data/thumbnail_course/%s", filename)
 
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
