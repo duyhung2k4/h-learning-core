@@ -33,8 +33,9 @@ func (h *quizzHandle) GetQuizzByEntityId(ctx *gin.Context) {
 	}
 
 	res, err := h.service.QueryQuizz.Find(requestdata.QueryReq[entity.Quizz]{
-		Condition: "entity_id = ?",
-		Args:      []interface{}{entityId},
+		Condition: "entity_id = ? AND entity_type = ?",
+		Args:      []interface{}{entityId, entityTypeString},
+		Order:     "id ASC",
 	})
 	if err != nil {
 		logapp.Logger("get-quizz", err.Error(), constant.ERROR_LOG)

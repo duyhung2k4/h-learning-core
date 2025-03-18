@@ -46,30 +46,21 @@ func Register(r *gin.Engine) {
 	routerconfig.AddRouter(r, routerconfig.RouterConfig{
 		Method:     constant.POST_HTTP,
 		Endpoint:   "quizz/create",
-		Middleware: []gin.HandlerFunc{
-			// middlewareapp.ValidateToken,
-			// middlewareapp.GetProfileId,
-		},
-		Handle: handle.CreateQuizz,
+		Middleware: []gin.HandlerFunc{},
+		Handle:     handle.CreateQuizz,
 	})
 
 	routerconfig.AddRouter(r, routerconfig.RouterConfig{
 		Method:     constant.PUT_HTTP,
 		Endpoint:   "quizz/update",
-		Middleware: []gin.HandlerFunc{
-			// middlewareapp.ValidateToken,
-			// middlewareapp.GetProfileId,
-		},
-		Handle: handle.UpdateQuizz,
+		Middleware: []gin.HandlerFunc{},
+		Handle:     handle.UpdateQuizz,
 	})
 
 	routerconfig.AddRouter(r, routerconfig.RouterConfig{
 		Method:     constant.DELETE_HTTP,
 		Endpoint:   "quizz/delete",
-		Middleware: []gin.HandlerFunc{
-			// middlewareapp.ValidateToken,
-			// middlewareapp.GetProfileId,
-		},
-		Handle: handle.DeleteQuizz,
+		Middleware: []gin.HandlerFunc{},
+		Handle:     handle.DeleteQuizz,
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"app/internal/connection"
 	requestdata "app/internal/dto/client"
 	"app/internal/entity"
+	"context"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rabbitmq/amqp091-go"
@@ -23,6 +24,7 @@ type AuthService interface {
 	SaveInfoRegsiter(ctx *gin.Context, uuid string, code string, infoRegister requestdata.RegisterRequest) error
 	CreateProfile(ctx *gin.Context, uuid string) error
 	CompareProfile(ctx *gin.Context, payload requestdata.LoginRequest) (*entity.Profile, error)
+	UpdateProfile(ctx context.Context, profileId uint, payload requestdata.UpdateProfileRequest) (*entity.Profile, error)
 }
 
 func Register() AuthService {
