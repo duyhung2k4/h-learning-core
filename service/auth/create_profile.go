@@ -33,10 +33,13 @@ func (s *authService) CreateProfile(ctx *gin.Context, uuid string) error {
 	}
 
 	var profile entity.Profile = entity.Profile{
-		Email:    saveInfoRegister.InfoRegister.Email,
-		Password: password,
-		RoleId:   role.ID,
-		Active:   &constant.TRUE,
+		FirstName: saveInfoRegister.InfoRegister.FirstName,
+		LastName:  saveInfoRegister.InfoRegister.LastName,
+		Phone:     saveInfoRegister.InfoRegister.Phone,
+		Email:     saveInfoRegister.InfoRegister.Email,
+		Password:  password,
+		RoleId:    role.ID,
+		Active:    &constant.TRUE,
 	}
 
 	if err := s.psql.Model(&entity.Profile{}).Create(&profile).Error; err != nil {

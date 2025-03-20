@@ -19,6 +19,7 @@ type courseRegisterHandle struct {
 type CourseRegisterHandle interface {
 	Create(ctx *gin.Context)
 	Detail(ctx *gin.Context)
+	GetAll(ctx *gin.Context)
 }
 
 func NewHandle() CourseRegisterHandle {
@@ -39,6 +40,16 @@ func Register(r *gin.Engine) {
 			middlewareapp.GetProfileId,
 		},
 		Handle: handle.Create,
+	})
+
+	routerconfig.AddRouter(r, routerconfig.RouterConfig{
+		Method:   constant.GET_HTTP,
+		Endpoint: "course-register/all",
+		Middleware: []gin.HandlerFunc{
+			middlewareapp.ValidateToken,
+			middlewareapp.GetProfileId,
+		},
+		Handle: handle.GetAll,
 	})
 
 	routerconfig.AddRouter(r, routerconfig.RouterConfig{

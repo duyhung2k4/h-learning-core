@@ -27,6 +27,11 @@ func (h *courseRegisterHandle) Detail(ctx *gin.Context) {
 	result, err := h.query.First(requestdata.QueryReq[entity.CourseRegister]{
 		Condition: "profile_id = ? AND course_id = ?",
 		Args:      []interface{}{profileId, courseId},
+		Preload: map[string]*string{
+			"Course":                   nil,
+			"Course.Chapters":          nil,
+			"Course.Chapters.Lessions": nil,
+		},
 	})
 	if err != nil {
 		logapp.Logger("find-course-register", err.Error(), constant.ERROR_LOG)

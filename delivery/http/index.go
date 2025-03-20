@@ -42,6 +42,8 @@ func Register() http.Handler {
 	documentlessionhandle.Register(r)
 	courseregisterhandle.Register(r)
 
+	r.StaticFS("/file", http.Dir("data"))
+
 	log.Printf(
 		"Server h-learning-core starting success! URL: http://%s:%s",
 		connection.GetConnect().CoreService.Host,

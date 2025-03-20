@@ -15,6 +15,7 @@ type lessionHandle struct {
 
 type LessionHandle interface {
 	GetDetailLession(ctx *gin.Context)
+	GetDetailLessionPublic(ctx *gin.Context)
 	Create(ctx *gin.Context)
 	Update(ctx *gin.Context)
 	Delete(ctx *gin.Context)
@@ -37,6 +38,16 @@ func Register(r *gin.Engine) {
 			middlewareapp.GetProfileId,
 		},
 		Handle: handle.GetDetailLession,
+	})
+
+	routerconfig.AddRouter(r, routerconfig.RouterConfig{
+		Method:   constant.GET_HTTP,
+		Endpoint: "lession/detail-public",
+		Middleware: []gin.HandlerFunc{
+			middlewareapp.ValidateToken,
+			middlewareapp.GetProfileId,
+		},
+		Handle: handle.GetDetailLessionPublic,
 	})
 
 	routerconfig.AddRouter(r, routerconfig.RouterConfig{
